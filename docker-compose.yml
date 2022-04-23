@@ -1,0 +1,21 @@
+version: '3'
+services:
+  backend:
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    command: bash -c "while true; do sleep 1; done"  # Infinite loop to keep container live doing nothing
+    # command: /start-reload.sh
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    ports:
+      - "14331:1433"
+    environment:
+      SA_PASSWORD: "7@j8rG2a"
+      ACCEPT_EULA: "Y"
+    volumes:
+      - .:/app
