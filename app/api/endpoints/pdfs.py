@@ -1,87 +1,65 @@
-from fastapi import APIRouter
+import imp
+from fastapi import APIRouter, Depends, HTTPException
 from pdf2image import convert_from_path
-from io import BytesIO
-from PIL import Image
-import re
+from sqlmodel import Session
 
-import pytesseract
+# local imports
+from api.helpers.post_helpers import *
+from api.db.init_db import get_session
+from api.models.pdfs import ExtractCreate
+
 
 router = APIRouter()
 
-@router.get("/")
-async def root():
-    
-    pages = convert_from_path("/app/src/Doc2.pdf")
-    extract = [read_img(pages[0])]
-
-    # \D+   -> any non digit and more
-    # (.*)  -> 0 to many characters
-    # \s    -> Any space, tab, or newline character
-    # \S    -> Any character that is not a space, tab, or newline
-    # *     -> * matches zero or more of the preceding group
-    expresions = [
-        r'vendor name: \D+(.*) (.*)\s\D+(.*) (.*)\s\D+\s\S+\s\D+\S+',
-        r'\scomments:(\s*\D+(\.\n))'
-    ]
-
-    res = [
-        [],
-        {
-            "Vendor_Name": "", 
-            "Fiscal_Number": "",
-            "Contract": "",
-            "Start_Date": "",
-            "End_Date": "",
-        }
-    ]
-  
-    res[1] = format_init(expresions[0], extract[0], res[1])
-    print(res)
-
-    return {"message": "Hello World"}
-
-
-def read_img(page):
-    with BytesIO() as f:
-        page.save(f, format="jpeg")
-        f.seek(0)
-        img = Image.open(f)
-        text = pytesseract.image_to_string(img, lang = 'eng')
-        return text
-
-
-def get_mo(exp, extract):
-    """"""
-    mo = re.search(exp, extract, re.IGNORECASE)
-    if mo is not None:
-        value = mo.group().split("\n")
-        value = (list(filter(bool, value)))
-        return value
-    return None
-
-
-def format_init(exp, extract, res={}):
+@router.post("/extract")
+async def extract_data(
+    *,
+    session: Session = Depends(get_session),
+    doc_path: str = None
+):
     """
     """ 
-    values = get_mo(exp, extract)
+    if doc_path is None:
+        raise HTTPException(status_code=400, detail="doc_path is required")
 
-    if values != None:
-        for k  in res.keys():
-            idx = [idx for (idx, s) in enumerate(values) if k[0:3] in s][0]
+    try: # convert the pdf to image
+        images = convert_from_path(doc_path)
+    except:
+        raise HTTPException(status_code=500,
+            detail="image from {} can't be extracted or does not exist".format(doc_path))
+    
+    # get list of regex 
+    regex = get_regex()
 
-            value = values[idx].split(":")[1]
+    obj = {
+        "Vendor_Name": "", 
+        "Fiscal_Number": "",
+        "Contract": "",
+        "Start_Date": "",
+        "End_Date": "",
+    }
 
-            if value == "":
-                res[k] = values[idx + 1]
-            else:
-                if value[0] == " ":
-                    value = value[1:]
-                res[k] = value
+    # extract text from image
+    extract = [read_img(images[0])]
+    # get and format the data for the first part os res
+    obj = format_init(regex[0], extract[0], obj)
+    # get and format the data for the comments part
+    obj = format_comments(regex[1], extract[0], obj)
+    obj["Doc_Path"] = doc_path
+    
+    db_obj = ExtractCreate.from_orm(obj)
+    session.add(db_obj)
+    session.commit()
+    session.refresh(db_obj)
+
+    
+    res = [
+        [db_obj.id, True],
+        obj
+    ]
     return res
 
-def format_comments():
-    """"""
-    pass
+
 
 
         
