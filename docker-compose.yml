@@ -1,21 +1,29 @@
 version: '3'
 services:
   backend:
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./app:/app
     build:
       context: ./
       dockerfile: Dockerfile
-    command: bash -c "while true; do sleep 1; done"  # Infinite loop to keep container live doing nothing
-    # command: /start-reload.sh
-  db:
-    image: mcr.microsoft.com/mssql/server:2019-latest
-    ports:
-      - "14331:1433"
-    environment:
-      SA_PASSWORD: "7@j8rG2a"
-      ACCEPT_EULA: "Y"
     volumes:
-      - .:/app
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      -  DB_URL=postgresql://prgx_admin:changethis@db:5432/pdfs
+    depends_on:
+      - db
+    #command: /start.sh
+    command: uvicorn main:app --reload --host 0.0.0.0
+  db:
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=prgx_admin
+      - POSTGRES_PASSWORD=changethis
+      - POSTGRES_DB=pdfs
+    ports:
+      - 5432:5432
+volumes:
+  postgres_data:

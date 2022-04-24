@@ -5,7 +5,14 @@ COPY ./app /app
 
 RUN apt-get update -y && apt-get upgrade -y 
 RUN apt-get install -y poppler-utils tesseract-ocr libtesseract-dev
-# RUN apt-get install -y tesseract-ocr libtesseract-dev -y
+
+# prevents Python from writing pyc files to disc
+ENV PYTHONDONTWRITEBYTECODE 1
+# prevents Python from buffering stdout and stderr
+ENV PYTHONUNBUFFERED 1
+
 
 RUN pip3 install -r /app/requirements.txt
 ENV PYTHONPATH=/app
+
+#RUN /start.sh
