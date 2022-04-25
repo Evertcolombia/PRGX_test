@@ -23,36 +23,44 @@ def get_mo(exp, extract):
     return None
 
 
-def format_init(exp, extract, res={}):
+def format_init(exp, extract):
     """
     """ 
+    obj = {
+        "Vendor_Name": "", 
+        "Fiscal_Number": "",
+        "Contract": "",
+        "Start_Date": "",
+        "End_Date": "",
+    }
+
     values = get_mo(exp, extract)
 
     if values != None:
-        for k  in res.keys():
+        for k  in obj.keys():
             idx = [idx for (idx, s) in enumerate(values) if k[0:3] in s][0]
             value = values[idx].split(":")[1]
             
             if value == "":
-                res[k] = values[idx + 1]
+                obj[k] = values[idx + 1]
             else:
                 if value[0] == " ":
                     value = value[1:]
-                res[k] = value
-    return res
+                obj[k] = value
+    return obj
 
 
-def format_comments(exp, extract, res={}):
+def format_comments(exp, extract, obj={}):
     """"""
     values = get_mo(exp, extract)
     if values != None:
         k = values[0].replace(":", "")
         del values[0]
         v = " ".join(values)
-        res[k] = v
+        obj[k] = v
     else:
-        res["Comments"] = None
-    return res
+        obj["Comments"] = None
+    return obj
 
 
 def get_regex():

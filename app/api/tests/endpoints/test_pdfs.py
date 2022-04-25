@@ -38,7 +38,7 @@ def test_read_extracts() -> None:
     response = client.get(f"{api_url}db_data?table_name=extract")
     assert response.status_code == 200
     content = response.json()
-    obj  = content[0]["Extractions"]
+    obj  = content[0]
     assert "id" in obj
     assert "vendor_name" in obj
     assert "fiscal_number" in obj
