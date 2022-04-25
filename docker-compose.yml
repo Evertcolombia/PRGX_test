@@ -1,0 +1,29 @@
+version: '3'
+services:
+  backend:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+    ports:
+      - "8000:8000"
+    environment:
+      -  DB_URL=postgresql://prgx_admin:changethis@db:5432/pdfs
+    depends_on:
+      - db
+    #command: /start.sh
+    command: uvicorn main:app --reload --host 0.0.0.0
+  db:
+    image: postgres:12
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/pgdata
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
+      - POSTGRES_USER=prgx_admin
+      - POSTGRES_PASSWORD=changethis
+      - POSTGRES_DB=pdfs
+    ports:
+      - 5432:5432
+volumes:
+  postgres_data:

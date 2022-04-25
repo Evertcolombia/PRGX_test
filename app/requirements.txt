@@ -1,0 +1,11 @@
+fastapi
+pillow
+tesseract
+pytesseract
+pdf2image
+tenacity 
+pydantic
+sqlmodel
+psycopg2-binary
+pytest
+requests
