@@ -19,6 +19,7 @@ async def extract_data(
     doc_path: str = None
 ):
     """
+    Create an extraction from a file
     """ 
     if doc_path is None:
         raise HTTPException(status_code=400, detail="doc_path is required")
@@ -68,6 +69,9 @@ async def get_data(
     session: Session = Depends(get_session),
     table_name: str = None
 ):
+    """
+    Get the list of rows from a table idenfied by table_name
+    """
     if table_name is None:
         raise HTTPException(status_code=400, detail="table_name is required")
 

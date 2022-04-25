@@ -5,6 +5,11 @@ import pytesseract
 
 
 def read_img(page):
+    """
+        read image from a pdf file page
+        args:
+            @page: page to read
+    """
     with BytesIO() as f:
         page.save(f, format="jpeg")
         f.seek(0)
@@ -14,7 +19,13 @@ def read_img(page):
 
 
 def get_mo(exp, extract):
-    """"""
+    """
+        generate a matc object using a regex
+
+        - args:
+            @exp: regex
+            @extract: text of pdf file
+    """
     mo = re.search(exp, extract, re.IGNORECASE)
     if mo is not None:
         value = mo.group().split("\n")
@@ -25,6 +36,10 @@ def get_mo(exp, extract):
 
 def format_init(exp, extract):
     """
+        format the data from the extract
+        - args:
+            @exp: regex
+            @extract: string content from pdf
     """ 
     obj = {
         "Vendor_Name": "", 
@@ -51,7 +66,13 @@ def format_init(exp, extract):
 
 
 def format_comments(exp, extract, obj={}):
-    """"""
+    """
+        format the comments section from extract string
+        - args:
+            @exp: regex
+            @extract: string content
+            @obj: obj Extraction
+    """
     values = get_mo(exp, extract)
     if values != None:
         k = values[0].replace(":", "")
@@ -64,7 +85,9 @@ def format_comments(exp, extract, obj={}):
 
 
 def get_regex():
-    """"""
+    """
+        get regex list to use
+    """
     # \D+   -> any non digit and more
     # (.*)  -> 0 to many characters
     # \s    -> Any space, tab, or newline character
