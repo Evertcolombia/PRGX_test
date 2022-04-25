@@ -72,4 +72,4 @@
 - Can review the program running in the next urls
 
     * [Documentation] (http://35.223.102.245:8000/docs)
-    * [test_from_browser] (http://35.223.102.245:8000/ap1/v1/extract?doc_path=/app/src/Doc2.pdf) or (http://35.223.102.245:8000/ap1/v1/db_data?table_name=extractions)
+    * [test_from_browser] (http://35.223.102.245:8000/api/v1/db_data?table_name=extractions)
